@@ -7,6 +7,7 @@ import java.util.Scanner;
 import org.json.simple.parser.ParseException;
 
 import com.clinic.daoImp.ClinicDaoImp;
+import com.clinic.dto.Clinic;
 import com.clinic.dto.Doctor;
 
 public class Abc {
@@ -21,9 +22,28 @@ public class Abc {
 		
 			ClinicDaoImp clinicDaoImp = new ClinicDaoImp();
 			Scanner scanner=new Scanner(System.in);
+			
+			System.out.println("Insert Your patient id:");
+			int patientId=scanner.nextInt();
+			
+			ArrayList<Clinic> clinicList=clinicDaoImp.getClinicDetailsByPatientId(patientId);
+			for (Clinic clinic : clinicList) {
+				System.out.println("Clinic Id:"+clinic.getClinicId());
+				System.out.println("Clinic Name:"+clinic.getClinicName());
+			}
+			
+			System.out.println("Enter clinic id:");
+			int clinicId=scanner.nextInt();
+			
 			//clinicDaoImp.dropTable();	
-			ArrayList<Doctor> clinicList = clinicDaoImp.getClinicDetailsByPatientId(1003);
-			System.out.println("clinics"+clinicList.toString());
+			ArrayList<Doctor> drList = clinicDaoImp.getDoctorDetailsByClinicId(clinicId);
+			for (Doctor doctor : drList) {
+				System.out.println("dr name:"+doctor.getDrName());
+				System.out.println("dr specialization:"+doctor.getSpecialization());
+				System.out.println("dr availabilty:"+doctor.getAvailability());
+				System.out.println("clinic name"+doctor.getClinic().getClinicName());
+				System.out.println("****************************************");
+			}
 			int clinicId=scanner.nextInt();
 			clinicDaoImp.getDrByClinicId(clinicId);
 		

@@ -230,19 +230,18 @@ public class ClinicDaoImp implements ClinicDao {
 		}
 	}
 
-	public ArrayList<Doctor> getClinicDetailsByPatientId(int patientId) {
-		System.out.println("hello");
+	public ArrayList<Doctor> getDoctorDetailsByClinicId(int clinicId) {
 		ArrayList<Doctor> clinicIdList = new ArrayList<Doctor>();
-		
+
 		try {
 			PreparedStatement ps = connection.prepareStatement(
-					"select * from doctor d natural join patient_clinic p natural join dr_clinic dc natural join clinic where p.patient_id=?");
-			ps.setInt(1, patientId);
+					"select * from doctor natural join dr_clinic where clinic_id=?");
+			ps.setInt(1, clinicId);
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
 				Clinic clinic = new Clinic();
-				Doctor doctor=new Doctor();
-				Patient patient=new Patient();
+				Doctor doctor = new Doctor();
+				Patient patient = new Patient();
 				clinic.setClinicId(rs.getInt(1));
 				clinic.setClinicName(rs.getString(7));
 				patient.setPatientId(rs.getInt(6));
@@ -262,7 +261,7 @@ public class ClinicDaoImp implements ClinicDao {
 	}
 
 	public void getDrByClinicId(int clinicId) {
-		ArrayList<Doctor> drArraySet = new ArrayList<Doctor>();
+		ArrayList<Doctor> drArrayList = new ArrayList<Doctor>();
 		try {
 			PreparedStatement ps1 = connection
 					.prepareStatement("select * from doctor natural join dr_clinic where clinic_id=?");
@@ -277,12 +276,12 @@ public class ClinicDaoImp implements ClinicDao {
 				doctor.setAvailability(resultSet.getString(4));
 				clinic.setClinicId(resultSet.getInt(5));
 				doctor.setClinic(clinic);
-				drArraySet.add(doctor);
+				drArrayList.add(doctor);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println("dr:" + drArraySet.toString());
+		System.out.println("dr:" + drArrayList.toString());
 	}
 
 	public boolean isExist(String tableName) {
@@ -302,6 +301,25 @@ public class ClinicDaoImp implements ClinicDao {
 			e.printStackTrace();
 		}
 		return false;
+	}
+
+	public ArrayList<Clinic> getClinicDetailsByPatientId(int patientId) {
+		ArrayList<Clinic> clinicList=new ArrayList<Clinic>();
+		try {
+			PreparedStatement ps = connection
+					.prepareStatement("select * from clinic natural join patient_clinic where patient_id=?");
+			ps.setInt(1, patientId);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				Clinic clinic = new Clinic();
+				clinic.setClinicId(rs.getInt(1));
+				clinic.setClinicName(rs.getString(7));
+				clinicList.add(clinic);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return clinicList;
 	}
 
 }

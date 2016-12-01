@@ -15,7 +15,8 @@ public interface ClinicDao {
 	public void insertClinicDetails(Clinic clinic);
 	public void insertDoctorDetails(Doctor doctor);
 	public void insertPatientDetails(Patient patient);
-	public ArrayList<Doctor> getClinicDetailsByPatientId(int patientId);
+	public ArrayList<Doctor> getDoctorDetailsByClinicId(int clinicId);
+	public ArrayList<Clinic> getClinicDetailsByPatientId(int patientId);
 	public void getDrByClinicId(int clinicId);
 	public void dropTable();
 	public boolean isExist(String tableName);
