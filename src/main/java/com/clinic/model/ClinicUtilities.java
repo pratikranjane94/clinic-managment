@@ -13,88 +13,106 @@ import com.clinic.dto.Patient;
 
 public class ClinicUtilities {
 
-	public Clinic readClinicJson(String clinicFileName, int i) {
-		Clinic clinic = new Clinic();
+	public ArrayList<Clinic> readClinicJson(String clinicFileName) {
+		ArrayList<Clinic> clinicObjList = new ArrayList<Clinic>();
 		JSONParser parser = new JSONParser();
 		try {
 			Object object = parser.parse(new FileReader(clinicFileName));
 			JSONObject doctObj = (JSONObject) object;
 			JSONArray doctorsArray = (JSONArray) doctObj.get("Clinic");
-			JSONObject doctorJson = (JSONObject) doctorsArray.get(i);
-			String clinicName = (String) doctorJson.get("ClinicName");
+			for (int i = 0; i < getSize(clinicFileName, "Clinic"); i++) {
+				Clinic clinic = new Clinic();
+				JSONObject doctorJson = (JSONObject) doctorsArray.get(i);
+				String clinicName = (String) doctorJson.get("ClinicName");
 
-			int clinicID = Integer.parseInt(String.valueOf(doctorJson.get("ClinicID")));
+				int clinicID = Integer.parseInt(String.valueOf(doctorJson.get("ClinicID")));
 
-			clinic.setClinicId(clinicID);
-			clinic.setClinicName(clinicName);
-
+				clinic.setClinicId(clinicID);
+				clinic.setClinicName(clinicName);
+				clinicObjList.add(clinic);
+			}
 		} catch (Exception e) {
 			System.out.println("Exception");
 		}
-		return clinic;
+		return clinicObjList;
 	}
 
 	@SuppressWarnings("unchecked")
-	public Doctor readDrJson(String clinicFileName, int i) {
-		Doctor doctor = new Doctor();
+	public ArrayList<Doctor> readDrJson(String clinicFileName) {
+		ArrayList<Doctor> doctorObjList = new ArrayList<Doctor>();
+
 		JSONParser parser = new JSONParser();
 		try {
 			Object object = parser.parse(new FileReader(clinicFileName));
 			JSONObject doctObj = (JSONObject) object;
 			JSONArray doctorsArray = (JSONArray) doctObj.get("Doctors");
-			JSONObject doctorJson = (JSONObject) doctorsArray.get(i);
-			String drName = (String) doctorJson.get("DrName");
+			for (int i = 0; i < getSize(clinicFileName, "Doctors"); i++) {
+				Doctor doctor = new Doctor();
+				JSONObject doctorJson = (JSONObject) doctorsArray.get(i);
+				String drName = (String) doctorJson.get("Name");
 
-			int drID = Integer.parseInt(String.valueOf(doctorJson.get("DoctorID")));
+				int drID = Integer.parseInt(String.valueOf(doctorJson.get("DoctID")));
 
-			String specialization = (String) doctorJson.get("Specialization");
+				String specialization = (String) doctorJson.get("Specialization");
 
-			String availability = (String) doctorJson.get("Availability");
+				JSONArray clinics = (JSONArray) doctorJson.get("Clinic");
+				ArrayList<Integer> clinicIdList = new ArrayList<Integer>();
+				ArrayList<String> availibilityList = new ArrayList<String>();
+				for (int j = 0; j < clinics.size(); j++) {
+					JSONObject clinicsObject = (JSONObject) clinics.get(j);
+					clinicIdList.add(Integer.parseInt((String) clinicsObject.get("ClinicID")));
+					availibilityList.add((String) clinicsObject.get("Availability"));
 
-			ArrayList<Integer> clinicIdList = (ArrayList<Integer>) doctorJson.get("ClinicID");
+				}
 
-			doctor.setDrID(drID);
-			doctor.setDrName(drName);
-			doctor.setSpecialization(specialization);
-			doctor.setAvailability(availability);
-			doctor.setClinicIdList(clinicIdList);
+				doctor.setDrID(drID);
+				doctor.setDrName(drName);
+				doctor.setSpecialization(specialization);
+				doctor.setAvalibilityList(availibilityList);
+				doctor.setClinicIdList(clinicIdList);
+				doctorObjList.add(doctor);
+			}
 		} catch (Exception e) {
 			System.out.println("Exception");
 		}
 
-		return doctor;
+		return doctorObjList;
 	}
 
 	@SuppressWarnings("unchecked")
-	public Patient readPatientJson(String clinicFileName, int i) {
-		Patient patient = new Patient();
+	public ArrayList<Patient> readPatientJson(String clinicFileName) {
+		ArrayList<Patient> patientObjList = new ArrayList<Patient>();
+
 		JSONParser parser = new JSONParser();
 		try {
 			Object object = parser.parse(new FileReader(clinicFileName));
 			JSONObject doctObj = (JSONObject) object;
 			JSONArray doctorsArray = (JSONArray) doctObj.get("Patients");
-			JSONObject doctorJson = (JSONObject) doctorsArray.get(i);
+			for (int i = 0; i < getSize(clinicFileName, "Patients"); i++) {
+				Patient patient = new Patient();
+				JSONObject doctorJson = (JSONObject) doctorsArray.get(i);
 
-			String patientName = (String) doctorJson.get("PatientName");
+				String patientName = (String) doctorJson.get("PatientName");
 
-			int patientId = Integer.parseInt(String.valueOf(doctorJson.get("PatientID")));
+				int patientId = Integer.parseInt(String.valueOf(doctorJson.get("PatientID")));
 
-			String mobileNo = (String) doctorJson.get("MobileNo");
+				String mobileNo = (String) doctorJson.get("MobileNo");
 
-			String gender = (String) doctorJson.get("Gender");
+				String gender = (String) doctorJson.get("Gender");
 
-			ArrayList<Integer> clinicIdList = (ArrayList<Integer>) doctorJson.get("ClinicID");
+				ArrayList<Integer> clinicIdList = (ArrayList<Integer>) doctorJson.get("ClinicID");
 
-			patient.setPatientId(patientId);
-			patient.setPatientName(patientName);
-			patient.setMobileNo(mobileNo);
-			patient.setGender(gender);
-			patient.setClinicIdList(clinicIdList);
-
+				patient.setPatientId(patientId);
+				patient.setPatientName(patientName);
+				patient.setMobileNo(mobileNo);
+				patient.setGender(gender);
+				patient.setClinicIdList(clinicIdList);
+				patientObjList.add(patient);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return patient;
+		return patientObjList;
 	}
 
 	public int getSize(String clinicFileName, String arrayName) {

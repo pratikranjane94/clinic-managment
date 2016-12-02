@@ -21,4 +21,9 @@ public class Clinic {
 		this.clinicName = clinicName;
 	}
 
+	@Override
+	public String toString() {
+		return "Clinic [clinicID=" + clinicID + ", clinicName=" + clinicName + "]";
+	}
+
 }

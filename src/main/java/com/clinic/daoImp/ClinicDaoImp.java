@@ -6,13 +6,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
-import com.bridgelabz.database.Database;
 import com.clinic.dao.ClinicDao;
 import com.clinic.dto.Clinic;
 import com.clinic.dto.Doctor;
@@ -53,8 +50,7 @@ public class ClinicDaoImp implements ClinicDao {
 		try {
 			PreparedStatement createDoctor = connection
 					.prepareStatement("CREATE TABLE doctor(dr_id INT NOT NULL,dr_name VARCHAR(100) NULL,"
-							+ "specialization VARCHAR(100) NULL," + "availability VARCHAR(100) NULL,"
-							+ "PRIMARY KEY (dr_id))");
+							+ "specialization VARCHAR(100) NULL," + "PRIMARY KEY (dr_id))");
 			createDoctor.executeUpdate();
 		} catch (MySQLSyntaxErrorException e) {
 			System.out.println("Table Present! Inserting Information");
@@ -81,10 +77,8 @@ public class ClinicDaoImp implements ClinicDao {
 	public void createDrClinicTable() {
 
 		try {
-			PreparedStatement create_dr_clinic = connection
-					.prepareStatement("CREATE TABLE dr_clinic (" + "dr_id INT NULL," + "clinic_id INT NULL,"
-							+ "CONSTRAINT dr_id FOREIGN KEY (dr_id)REFERENCES doctor (dr_id),"
-							+ "CONSTRAINT clinic_id FOREIGN KEY (clinic_id)REFERENCES clinic (clinic_id));");
+			PreparedStatement create_dr_clinic = connection.prepareStatement(
+					"CREATE TABLE dr_clinic (dr_id INT NULL,clinic_id INT NULL,availability VARCHAR(100) NULL)");
 			create_dr_clinic.executeUpdate();
 
 		} catch (MySQLSyntaxErrorException e) {
@@ -92,10 +86,9 @@ public class ClinicDaoImp implements ClinicDao {
 		} catch (SQLException e) {
 			System.out.println("Error in creating table");
 		}
-
 	}
 
-	public void createPatientClinic() {
+	public void createPatientClinicTable() {
 		/*
 		 * try { connection = Database.getConnection(); } catch (Exception e) {
 		 * System.out.println("Exception in opening connenction"); }
@@ -119,37 +112,19 @@ public class ClinicDaoImp implements ClinicDao {
 		if (!isExist("doctor")) {
 			createDoctorTable();
 		}
-		if (!isExist("dr_clinic")) {
-			createDrClinicTable();
-		}
 
 		try {
 
-			PreparedStatement insert = connection.prepareStatement(
-					"insert into doctor(dr_id, dr_name, specialization, availability) values(?,?,?,?)");
+			PreparedStatement insert = connection
+					.prepareStatement("insert into doctor(dr_id, dr_name, specialization) values(?,?,?)");
 			insert.setInt(1, doctor.getDrID());
 			insert.setString(2, doctor.getDrName());
 			insert.setString(3, doctor.getSpecialization());
-			insert.setString(4, doctor.getAvailability());
 			insert.executeUpdate();
 			System.out.println("Doctor details are stored");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		for (int j = 0; j < doctor.getClinicIdList().size(); j++) {
-
-			try {
-				PreparedStatement insert = connection
-						.prepareStatement("insert into dr_clinic(dr_id, clinic_id) values(?,?)");
-				insert.setInt(1, doctor.getDrID());
-				insert.setInt(2, Integer.parseInt(String.valueOf(doctor.getClinicIdList().get(j))));
-				insert.executeUpdate();
-				System.out.println("Doctor clinic mapping data is stored");
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-
 		System.out.println("*****************************************************");
 
 	}
@@ -181,10 +156,6 @@ public class ClinicDaoImp implements ClinicDao {
 			createPatientTable();
 		}
 
-		if (!isExist("patients_clinic")) {
-			createPatientClinic();
-		}
-
 		try {
 			PreparedStatement insertPatient = connection
 					.prepareStatement("insert into patient(patient_id,patient_name,gender,mobile_no) values(?,?,?,?)");
@@ -197,6 +168,38 @@ public class ClinicDaoImp implements ClinicDao {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		System.out.println("*****************************************************");
+	}
+
+	public void insertDrClinicDetails(Doctor doctor) {
+
+		if (!isExist("dr_clinic")) {
+			createDrClinicTable();
+		}
+
+		for (int j = 0; j < doctor.getClinicIdList().size(); j++) {
+
+			try {
+				PreparedStatement insert = connection
+						.prepareStatement("insert into dr_clinic(dr_id, clinic_id,availability) values(?,?,?)");
+				insert.setInt(1, doctor.getDrID());
+				insert.setInt(2, Integer.parseInt(String.valueOf(doctor.getClinicIdList().get(j))));
+				insert.setString(3, doctor.getAvalibilityList().get(j));
+				insert.executeUpdate();
+				System.out.println("Doctor clinic mapping data is stored");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+	}
+
+	public void insertPatientClinicDetails(Patient patient) {
+
+		if (!isExist("patients_clinic")) {
+			createPatientClinicTable();
+		}
+
 		for (int i = 0; i < patient.getClinicIdList().size(); i++) {
 			try {
 				PreparedStatement insertPatientClinic = connection
@@ -209,79 +212,7 @@ public class ClinicDaoImp implements ClinicDao {
 				e.printStackTrace();
 			}
 		}
-		System.out.println("*****************************************************");
-	}
 
-	public void dropTable() {
-		try {
-			PreparedStatement drop1 = connection.prepareStatement("DROP TABLE dr_clinic");
-			PreparedStatement drop11 = connection.prepareStatement("DROP TABLE patient_clinic");
-			PreparedStatement drop2 = connection.prepareStatement("DROP TABLE doctor");
-			PreparedStatement drop4 = connection.prepareStatement("DROP TABLE patient");
-			PreparedStatement drop3 = connection.prepareStatement("DROP TABLE clinic");
-			drop1.executeUpdate();
-			drop11.executeUpdate();
-			drop2.executeUpdate();
-			drop3.executeUpdate();
-			drop4.executeUpdate();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	public ArrayList<Doctor> getDoctorDetailsByClinicId(int clinicId) {
-		ArrayList<Doctor> clinicIdList = new ArrayList<Doctor>();
-
-		try {
-			PreparedStatement ps = connection.prepareStatement(
-					"select * from doctor natural join dr_clinic where clinic_id=?");
-			ps.setInt(1, clinicId);
-			ResultSet rs = ps.executeQuery();
-			while (rs.next()) {
-				Clinic clinic = new Clinic();
-				Doctor doctor = new Doctor();
-				Patient patient = new Patient();
-				clinic.setClinicId(rs.getInt(1));
-				clinic.setClinicName(rs.getString(7));
-				patient.setPatientId(rs.getInt(6));
-				doctor.setDrID(rs.getInt(2));
-				doctor.setDrName(rs.getString(3));
-				doctor.setSpecialization(rs.getString(4));
-				doctor.setAvailability(rs.getString(5));
-				doctor.setClinic(clinic);
-				doctor.setPatient(patient);
-				clinicIdList.add(doctor);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return clinicIdList;
-
-	}
-
-	public void getDrByClinicId(int clinicId) {
-		ArrayList<Doctor> drArrayList = new ArrayList<Doctor>();
-		try {
-			PreparedStatement ps1 = connection
-					.prepareStatement("select * from doctor natural join dr_clinic where clinic_id=?");
-			ps1.setInt(1, clinicId);
-			ResultSet resultSet = ps1.executeQuery();
-			while (resultSet.next()) {
-				Doctor doctor = new Doctor();
-				Clinic clinic = new Clinic();
-				doctor.setDrID(resultSet.getInt(1));
-				doctor.setDrName(resultSet.getString(2));
-				doctor.setSpecialization(resultSet.getString(3));
-				doctor.setAvailability(resultSet.getString(4));
-				clinic.setClinicId(resultSet.getInt(5));
-				doctor.setClinic(clinic);
-				drArrayList.add(doctor);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		System.out.println("dr:" + drArrayList.toString());
 	}
 
 	public boolean isExist(String tableName) {
@@ -303,8 +234,55 @@ public class ClinicDaoImp implements ClinicDao {
 		return false;
 	}
 
+	public void dropTable() {
+		try {
+			PreparedStatement drop1 = connection.prepareStatement("DROP TABLE dr_clinic");
+			PreparedStatement drop11 = connection.prepareStatement("DROP TABLE patient_clinic");
+			PreparedStatement drop2 = connection.prepareStatement("DROP TABLE doctor");
+			PreparedStatement drop4 = connection.prepareStatement("DROP TABLE patient");
+			PreparedStatement drop3 = connection.prepareStatement("DROP TABLE clinic");
+			drop1.executeUpdate();
+			drop11.executeUpdate();
+			drop2.executeUpdate();
+			drop3.executeUpdate();
+			drop4.executeUpdate();
+
+		} catch (Exception e) {
+			System.out.println("Exception while droping");
+		}
+	}
+
+	public ArrayList<Doctor> getDoctorDetailsByClinicId(int clinicId) {
+		ArrayList<Doctor> clinicIdList = new ArrayList<Doctor>();
+
+		try {
+			PreparedStatement ps = connection.prepareStatement(
+					"select * from doctor natural join dr_clinic natural join clinic where clinic_id=?");
+			ps.setInt(1, clinicId);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				Clinic clinic = new Clinic();
+				Doctor doctor = new Doctor();
+				Patient patient = new Patient();
+				clinic.setClinicId(rs.getInt("clinic_id"));
+				clinic.setClinicName(rs.getString("clinic_name"));
+				doctor.setDrID(rs.getInt("dr_id"));
+				doctor.setDrName(rs.getString("dr_name"));
+				doctor.setSpecialization(rs.getString("specialization"));
+				doctor.setAvailability(rs.getString("availability" + ""));
+				doctor.setClinic(clinic);
+				doctor.setPatient(patient);
+				clinicIdList.add(doctor);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return clinicIdList;
+
+	}
+
 	public ArrayList<Clinic> getClinicDetailsByPatientId(int patientId) {
-		ArrayList<Clinic> clinicList=new ArrayList<Clinic>();
+		ArrayList<Clinic> clinicList = new ArrayList<Clinic>();
 		try {
 			PreparedStatement ps = connection
 					.prepareStatement("select * from clinic natural join patient_clinic where patient_id=?");
@@ -312,8 +290,8 @@ public class ClinicDaoImp implements ClinicDao {
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
 				Clinic clinic = new Clinic();
-				clinic.setClinicId(rs.getInt(1));
-				clinic.setClinicName(rs.getString(7));
+				clinic.setClinicId(rs.getInt("clinic_id"));
+				clinic.setClinicName(rs.getString("clinic_name"));
 				clinicList.add(clinic);
 			}
 		} catch (Exception e) {
@@ -321,5 +299,95 @@ public class ClinicDaoImp implements ClinicDao {
 		}
 		return clinicList;
 	}
+
+	public ArrayList<Doctor> getDoctorByAvailability(String availability, int clinicId) {
+		ArrayList<Doctor> doctorList = new ArrayList<Doctor>();
+
+		ArrayList<String> availabilityList = new ArrayList<String>();
+		try {
+			PreparedStatement ps = connection.prepareStatement(
+					"select * from doctor natural join dr_clinic natural join clinic where availability=? and clinic_id=?");
+			ps.setString(1, availability);
+			ps.setInt(2, clinicId);
+			ResultSet rs = ps.executeQuery();
+			if (!rs.next()) {
+				return null;
+			} else {
+
+				while (rs.next()) {
+					Doctor doctor = new Doctor();
+					Clinic clinic = new Clinic();
+
+					doctor.setDrID(rs.getInt("dr_id"));
+					doctor.setDrName(rs.getString("dr_name"));
+					doctor.setSpecialization(rs.getString("specialization"));
+					availabilityList.add(rs.getString("availability"));
+
+					clinic.setClinicId(rs.getInt("clinic_id"));
+					clinic.setClinicName(rs.getString("clinic_name"));
+					doctor.setClinic(clinic);
+
+					doctorList.add(doctor);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return doctorList;
+	}
+
+	public Doctor getDoctorDetailsByID(int drId, String availability, int clinicId) {
+		Doctor doctor = null;
+		Clinic clinic = null;
+		try {
+			PreparedStatement ps = connection.prepareStatement(
+					"select * from doctor natural join dr_clinic natural join clinic where availability=? and clinic_id=? and dr_id=?");
+			ps.setString(1, availability);
+			ps.setInt(2, clinicId);
+			ps.setInt(3, drId);
+			ResultSet rs=ps.executeQuery();
+			while (rs.next()) {
+				doctor = new Doctor();
+				clinic = new Clinic();
+				
+				clinic.setClinicId(rs.getInt("clinic_id"));
+				clinic.setClinicName(rs.getString("clinic_name"));
+				
+				doctor.setDrID(rs.getInt("dr_id"));
+				doctor.setDrName(rs.getString("dr_name"));
+				doctor.setSpecialization(rs.getString("specialization"));
+				doctor.setClinic(clinic);
+				
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return doctor;
+	}
+
+	public void createAppointmentTable() {
+		try {
+			PreparedStatement ps = connection.prepareStatement(
+					"CREATE TABLE Appointment (clinic_id INT NULL,dr_id INT NULL,patient_id INT NULL,time INT NULL,date INT NULL,"
+					+ "CONSTRAINT clinic_idA FOREIGN KEY (clinic_id) REFERENCES clinic (`clinic_id`),"
+					+ "CONSTRAINT dr_idA FOREIGN KEY (dr_id) REFERENCES doctor (dr_id),"
+					+ "CONSTRAINT patient_idA FOREIGN KEY (patient_id) REFERENCES patient (patient_id))");
+			ps.executeUpdate();
+		} catch (MySQLSyntaxErrorException e) {
+			System.out.println("Table Present! Inserting Information");
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("Error in creating table");
+		}
+	}
+
+	public boolean isAppointmentAvailable(int drId) {
+		
+		return false;
+	}
+	
+	
 
 }

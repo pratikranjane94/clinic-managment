@@ -9,7 +9,16 @@ public class Doctor {
 	private String availability;
 	private Clinic clinic;
 	private Patient patient;
+	private ArrayList<String> avalibilityList;
 	private ArrayList<Integer> clinicIdList;
+
+	public ArrayList<String> getAvalibilityList() {
+		return avalibilityList;
+	}
+
+	public void setAvalibilityList(ArrayList<String> avalibilityList) {
+		this.avalibilityList = avalibilityList;
+	}
 
 	public int getDrID() {
 		return drID;
@@ -72,7 +81,5 @@ public class Doctor {
 		return "Doctor [drID=" + drID + ", drName=" + drName + ", specialization=" + specialization + ", availability="
 				+ availability + ", clinic=" + clinic + ", patient=" + patient + ", clinicIdList=" + clinicIdList + "]";
 	}
-
-	
 
 }
