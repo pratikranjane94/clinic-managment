@@ -2,6 +2,7 @@ package com.clinic.daoImp;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,6 +12,7 @@ import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
 import com.clinic.dao.ClinicDao;
+import com.clinic.dto.Appointment;
 import com.clinic.dto.Clinic;
 import com.clinic.dto.Doctor;
 import com.clinic.dto.Patient;
@@ -39,7 +41,7 @@ public class ClinicDaoImp implements ClinicDao {
 					+ "clinic_name varchar(100) DEFAULT NULL, " + "PRIMARY KEY (clinic_id))");
 			createClinic.executeUpdate();
 		} catch (MySQLSyntaxErrorException e) {
-			System.out.println("Table Present! Inserting Information");
+			System.out.println("Table Present! ");
 		} catch (SQLException e) {
 			System.out.println("Error in creating table");
 		}
@@ -53,7 +55,7 @@ public class ClinicDaoImp implements ClinicDao {
 							+ "specialization VARCHAR(100) NULL," + "PRIMARY KEY (dr_id))");
 			createDoctor.executeUpdate();
 		} catch (MySQLSyntaxErrorException e) {
-			System.out.println("Table Present! Inserting Information");
+			System.out.println("Table Present! ");
 		} catch (SQLException e) {
 			System.out.println("Error in creating table");
 		}
@@ -67,7 +69,7 @@ public class ClinicDaoImp implements ClinicDao {
 							+ "gender VARCHAR(100) NULL," + "mobile_no VARCHAR(100) NULL,PRIMARY KEY (patient_id))");
 			createPatient.executeUpdate();
 		} catch (MySQLSyntaxErrorException e) {
-			System.out.println("Table Present! Inserting Information");
+			System.out.println("Table Present! ");
 		} catch (SQLException e) {
 			System.out.println("Error in creating table");
 		}
@@ -82,7 +84,7 @@ public class ClinicDaoImp implements ClinicDao {
 			create_dr_clinic.executeUpdate();
 
 		} catch (MySQLSyntaxErrorException e) {
-			System.out.println("Table Present! Inserting Information");
+			System.out.println("Table Present! ");
 		} catch (SQLException e) {
 			System.out.println("Error in creating table");
 		}
@@ -100,7 +102,7 @@ public class ClinicDaoImp implements ClinicDao {
 							+ "CONSTRAINT patient_id2 FOREIGN KEY (patient_id) REFERENCES patient (patient_id))");
 			create_patient_clinic.executeUpdate();
 		} catch (MySQLSyntaxErrorException e) {
-			System.out.println("Table Present! Inserting Information");
+			System.out.println("Table Present! ");
 		} catch (SQLException e) {
 			System.out.println("Error in creating table");
 		}
@@ -303,33 +305,29 @@ public class ClinicDaoImp implements ClinicDao {
 	public ArrayList<Doctor> getDoctorByAvailability(String availability, int clinicId) {
 		ArrayList<Doctor> doctorList = new ArrayList<Doctor>();
 
-		ArrayList<String> availabilityList = new ArrayList<String>();
 		try {
 			PreparedStatement ps = connection.prepareStatement(
 					"select * from doctor natural join dr_clinic natural join clinic where availability=? and clinic_id=?");
 			ps.setString(1, availability);
 			ps.setInt(2, clinicId);
 			ResultSet rs = ps.executeQuery();
-			if (!rs.next()) {
-				return null;
-			} else {
+			while (rs.next()) {
+				Doctor doctor = new Doctor();
+				Clinic clinic = new Clinic();
 
-				while (rs.next()) {
-					Doctor doctor = new Doctor();
-					Clinic clinic = new Clinic();
+				doctor.setDrID(rs.getInt("dr_id"));
+				doctor.setDrName(rs.getString("dr_name"));
+				doctor.setSpecialization(rs.getString("specialization"));
+				doctor.setAvailability(rs.getString("availability"));
 
-					doctor.setDrID(rs.getInt("dr_id"));
-					doctor.setDrName(rs.getString("dr_name"));
-					doctor.setSpecialization(rs.getString("specialization"));
-					availabilityList.add(rs.getString("availability"));
+				clinic.setClinicId(rs.getInt("clinic_id"));
+				clinic.setClinicName(rs.getString("clinic_name"));
+				doctor.setClinic(clinic);
 
-					clinic.setClinicId(rs.getInt("clinic_id"));
-					clinic.setClinicName(rs.getString("clinic_name"));
-					doctor.setClinic(clinic);
-
-					doctorList.add(doctor);
-				}
+				doctorList.add(doctor);
 			}
+		} catch (NullPointerException e) {
+			return null;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -346,19 +344,19 @@ public class ClinicDaoImp implements ClinicDao {
 			ps.setString(1, availability);
 			ps.setInt(2, clinicId);
 			ps.setInt(3, drId);
-			ResultSet rs=ps.executeQuery();
+			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
 				doctor = new Doctor();
 				clinic = new Clinic();
-				
+
 				clinic.setClinicId(rs.getInt("clinic_id"));
 				clinic.setClinicName(rs.getString("clinic_name"));
-				
+
 				doctor.setDrID(rs.getInt("dr_id"));
 				doctor.setDrName(rs.getString("dr_name"));
 				doctor.setSpecialization(rs.getString("specialization"));
 				doctor.setClinic(clinic);
-				
+
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -370,24 +368,141 @@ public class ClinicDaoImp implements ClinicDao {
 	public void createAppointmentTable() {
 		try {
 			PreparedStatement ps = connection.prepareStatement(
-					"CREATE TABLE Appointment (clinic_id INT NULL,dr_id INT NULL,patient_id INT NULL,time INT NULL,date INT NULL,"
-					+ "CONSTRAINT clinic_idA FOREIGN KEY (clinic_id) REFERENCES clinic (`clinic_id`),"
-					+ "CONSTRAINT dr_idA FOREIGN KEY (dr_id) REFERENCES doctor (dr_id),"
-					+ "CONSTRAINT patient_idA FOREIGN KEY (patient_id) REFERENCES patient (patient_id))");
+					"CREATE TABLE appointment (clinic_id INT NULL,dr_id INT NULL,patient_id INT NULL,time INT NULL,date VARCHAR(45) NULL,"
+							+ "CONSTRAINT clinic_idA FOREIGN KEY (clinic_id) REFERENCES clinic (`clinic_id`),"
+							+ "CONSTRAINT dr_idA FOREIGN KEY (dr_id) REFERENCES doctor (dr_id),"
+							+ "CONSTRAINT patient_idA FOREIGN KEY (patient_id) REFERENCES patient (patient_id),PRIMARY KEY (no))");
 			ps.executeUpdate();
 		} catch (MySQLSyntaxErrorException e) {
-			System.out.println("Table Present! Inserting Information");
+			e.printStackTrace();
+			System.out.println("Table Present! ");
 		} catch (SQLException e) {
 			e.printStackTrace();
 			System.out.println("Error in creating table");
 		}
 	}
 
-	public boolean isAppointmentAvailable(int drId) {
-		
-		return false;
+	public int isAppointmentAvailable(int drId) {
+		int noOfAppointment = 0;
+		try {
+			PreparedStatement ps = connection
+					.prepareStatement("SELECT count(dr_id) as count FROM appointment where dr_id=?");
+			ps.setInt(1, drId);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				noOfAppointment = rs.getInt(1);
+			}
+
+			System.out.println("Size:" + noOfAppointment);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return noOfAppointment;
+	}
+
+	public boolean isAppointmentAlreadyTaken(int drId, int patientId) {
+		int noOfAppointment = 0;
+		try {
+			PreparedStatement ps = connection
+					.prepareStatement("SELECT count(dr_id) as count FROM appointment where dr_id=? and patient_id=?");
+			ps.setInt(1, drId);
+			ps.setInt(2, patientId);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				noOfAppointment = rs.getInt(1);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if (noOfAppointment > 0)
+			return true;
+		else
+			return false;
+	}
+
+	public int checkTimeForAppointment(int drId) {
+		int time = 0;
+		try {
+			PreparedStatement ps = connection
+					.prepareStatement("SELECT time FROM appointment where dr_id=? ORDER BY time DESC LIMIT 1");
+			ps.setInt(1, drId);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				time = rs.getInt(1);
+			}
+			if (time == 0)
+				time = 8;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return time;
+	}
+
+	public void takeAppointment(int drId, int clinicId, int patientId, int time, String date) {
+
+		if (!isExist("appointment")) {
+			createAppointmentTable();
+		}
+
+		try {
+			PreparedStatement insert = connection.prepareStatement(
+					"insert into appointment(clinic_id,dr_id,patient_id,time,date) values(?,?,?,?,?)");
+			insert.setInt(1, clinicId);
+			insert.setInt(2, drId);
+			insert.setInt(3, patientId);
+			insert.setInt(4, time);
+			insert.setString(5, date);
+			insert.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public Doctor showAppointment(int drId, int patientId) {
+		Doctor doctor = new Doctor();
+		Appointment appointment = new Appointment();
+		Clinic clinic = new Clinic();
+		Patient patient = new Patient();
+		try {
+			PreparedStatement ps = connection.prepareStatement(
+					"SELECT * FROM doctor natural join appointment natural join clinic where dr_id=? and patient_id=?");
+			ps.setInt(1, drId);
+			ps.setInt(2, patientId);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				doctor.setDrID(rs.getInt("dr_id"));
+				doctor.setDrName(rs.getString("dr_name"));
+				doctor.setSpecialization(rs.getString("specialization"));
+				appointment.setDate(rs.getString("date"));
+				appointment.setTime(rs.getInt("time"));
+				clinic.setClinicId(rs.getInt("clinic_id"));
+				clinic.setClinicName(rs.getString("clinic_name"));
+				patient.setPatientId(rs.getInt("patient_id"));
+				doctor.setClinic(clinic);
+				doctor.setAppointment(appointment);
+				doctor.setPatient(patient);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return doctor;
 	}
 	
-	
+	public String getNextDayForAppointment(int drId) {
+		String date=null;
+		try {
+			PreparedStatement ps = connection.prepareStatement(
+					"SELECT date FROM appointment where dr_id=? ORDER BY time DESC LIMIT 1");
+			ps.setInt(1, drId);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				date=rs.getString("date");
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return date;
+	}
 
 }

@@ -1,7 +1,12 @@
 package com.clinic.model;
 
 import java.io.FileReader;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -126,5 +131,20 @@ public class ClinicUtilities {
 			System.out.println(e);
 		}
 		return 1;
+	}
+	
+	public String getDate(){
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		String currentDate = dateFormat.format(new Date());
+
+		Calendar calendar = Calendar.getInstance();
+		try {
+			calendar.setTime(dateFormat.parse(currentDate));
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		calendar.add(Calendar.DATE, 1);
+		String tommorowDate = dateFormat.format(calendar.getTime());
+		return tommorowDate;
 	}
 }

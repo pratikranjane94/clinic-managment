@@ -2,18 +2,8 @@ package com.clinic.dto;
 
 public class Appointment {
 
-	private int id;
 	private String date;
-	private String format;
-	private String time;
-
-	public int getId() {
-		return id;
-	}
-
-	public void setId(int id) {
-		this.id = id;
-	}
+	private int time;
 
 	public String getDate() {
 		return date;
@@ -23,19 +13,11 @@ public class Appointment {
 		this.date = date;
 	}
 
-	public String getFormat() {
-		return format;
-	}
-
-	public void setFormat(String format) {
-		this.format = format;
-	}
-
-	public String getTime() {
+	public int getTime() {
 		return time;
 	}
 
-	public void setTime(String time) {
+	public void setTime(int time) {
 		this.time = time;
 	}
 

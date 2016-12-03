@@ -9,6 +9,7 @@ public class Doctor {
 	private String availability;
 	private Clinic clinic;
 	private Patient patient;
+	private Appointment appointment;
 	private ArrayList<String> avalibilityList;
 	private ArrayList<Integer> clinicIdList;
 
@@ -76,10 +77,19 @@ public class Doctor {
 		this.patient = patient;
 	}
 
+	public Appointment getAppointment() {
+		return appointment;
+	}
+
+	public void setAppointment(Appointment appointment) {
+		this.appointment = appointment;
+	}
+
 	@Override
 	public String toString() {
 		return "Doctor [drID=" + drID + ", drName=" + drName + ", specialization=" + specialization + ", availability="
-				+ availability + ", clinic=" + clinic + ", patient=" + patient + ", clinicIdList=" + clinicIdList + "]";
+				+ availability + ", clinic=" + clinic + ", patient=" + patient + ", appointment=" + appointment
+				+ ", avalibilityList=" + avalibilityList + ", clinicIdList=" + clinicIdList + "]";
 	}
 
 }
