@@ -24,8 +24,8 @@ public interface ClinicDao {
 	public ArrayList<Clinic> getClinicDetailsByPatientId(int patientId);
 	public ArrayList<Doctor> getDoctorByAvailability(String availability, int clinicId);
 	public Doctor getDoctorDetailsByID(int drId,String availability,int clinicId);
-	public int isAppointmentAvailable(int drId);
-	public boolean isAppointmentAlreadyTaken(int drId,int patientId);
+	public int isAppointmentAvailable(int drId,String currentDate);
+	public boolean isAppointmentAlreadyTaken(int drId,int patientId,String currentDate);
 	public int checkTimeForAppointment(int drId);
 	public void takeAppointment(int drId,int clinicId,int patientId,int time,String date);
 	public Doctor showAppointment(int drId,int patientId);

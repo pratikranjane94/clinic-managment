@@ -382,12 +382,13 @@ public class ClinicDaoImp implements ClinicDao {
 		}
 	}
 
-	public int isAppointmentAvailable(int drId) {
+	public int isAppointmentAvailable(int drId,String currentDate) {
 		int noOfAppointment = 0;
 		try {
 			PreparedStatement ps = connection
-					.prepareStatement("SELECT count(dr_id) as count FROM appointment where dr_id=?");
+					.prepareStatement("SELECT count(dr_id) as count FROM appointment where dr_id=? and date=?");
 			ps.setInt(1, drId);
+			ps.setString(2, currentDate);
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
 				noOfAppointment = rs.getInt(1);
@@ -400,13 +401,14 @@ public class ClinicDaoImp implements ClinicDao {
 		return noOfAppointment;
 	}
 
-	public boolean isAppointmentAlreadyTaken(int drId, int patientId) {
+	public boolean isAppointmentAlreadyTaken(int drId, int patientId,String currentDate) {
 		int noOfAppointment = 0;
 		try {
 			PreparedStatement ps = connection
-					.prepareStatement("SELECT count(dr_id) as count FROM appointment where dr_id=? and patient_id=?");
+					.prepareStatement("SELECT count(dr_id) as count FROM appointment where dr_id=? and patient_id=? and date=?");
 			ps.setInt(1, drId);
 			ps.setInt(2, patientId);
+			ps.setString(3, currentDate);
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
 				noOfAppointment = rs.getInt(1);

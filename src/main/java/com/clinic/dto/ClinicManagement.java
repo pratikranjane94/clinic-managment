@@ -145,14 +145,16 @@ public class ClinicManagement {
 				int drId = scanner.nextInt();
 				doctorModel = clinicDaoImp.getDoctorDetailsByID(drId, availability, clinicId);
 
-				//checking whether appointment is already taken 
-				if (clinicDaoImp.isAppointmentAlreadyTaken(drId, patientId)) {
+				// checking whether appointment is already taken
+				DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+				String appointmentDate = clinicUtilities.getDate(dateFormat.format(new Date()));
+				if (clinicDaoImp.isAppointmentAlreadyTaken(drId, patientId, appointmentDate)) {
 					Doctor doctor = new Doctor();
 					System.out.println("You already have taken an appointment");
-					
-					//showing appointment details
+
+					// showing appointment details
 					doctor = clinicDaoImp.showAppointment(drId, patientId);
-					
+
 					System.out.println(
 							"Clinic Id\t Clinic Name\t Patient Id\t Dr Id\t Dr Name\t specialization\t Time\t Date");
 					System.out.println(doctor.getClinic().getClinicId() + "\t" + doctor.getClinic().getClinicName()
@@ -162,25 +164,39 @@ public class ClinicManagement {
 					break;
 				}
 
-				//checking appointment is available or not
-				int noOfAppointments = clinicDaoImp.isAppointmentAvailable(drId);
+				// checking appointment is available or not
+				// DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+				// String currentDate = dateFormat.format(new Date());
+
+				int noOfAppointments = clinicDaoImp.isAppointmentAvailable(drId, appointmentDate);
 				if (noOfAppointments == 2) {
-					System.out.println("All appointments are full")	;
+					System.out.println("All appointments are full");
 					String date = clinicDaoImp.getNextDayForAppointment(drId);
-					System.out.println("Yo can get appointment for : "+date);
-					System.out.println("Do you want appointment for : "+date);
+					int appointmentTime = clinicDaoImp.checkTimeForAppointment(drId);
+					System.out.println("Yo can get appointment for : " + date);
+					String nextDate = clinicUtilities.getDate(appointmentDate);
+					System.out.println("Do you want appointment for : " + nextDate);
+					String ans = scanner.next();
+					if (ans.equalsIgnoreCase("no")) {
+						System.out.println("Exit");
+						break;
+					} else {
+						clinicDaoImp.takeAppointment(drId, clinicId, patientId, appointmentTime, nextDate);
+					}
 				} else {
 					time = clinicDaoImp.checkTimeForAppointment(drId);
 					time = time + 1;
 					System.out.println("Time Available for Appointment is : " + time);
-				}
-				System.out.println("Do you want to take appointment press YES or NO");
-				String ans = scanner.next();
-				if (ans.equalsIgnoreCase("no"))
+					System.out.println("Do you want to take appointment press YES or NO");
+					String ans = scanner.next();
+					if (ans.equalsIgnoreCase("no")) {
+						break;
+					}
+					String date = clinicUtilities.getDate(dateFormat.format(new Date()));
+					clinicDaoImp.takeAppointment(drId, clinicId, patientId, time, date);
 					break;
-				String date = clinicUtilities.getDate();
-				clinicDaoImp.takeAppointment(drId, clinicId, patientId, time, date);
-				break;
+				}
+
 			}
 			case 4: {
 				System.out.println("Exit");

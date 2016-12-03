@@ -133,13 +133,13 @@ public class ClinicUtilities {
 		return 1;
 	}
 	
-	public String getDate(){
+	public String getDate(String date){
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		String currentDate = dateFormat.format(new Date());
+		//String currentDate = dateFormat.format(new Date());
 
 		Calendar calendar = Calendar.getInstance();
 		try {
-			calendar.setTime(dateFormat.parse(currentDate));
+			calendar.setTime(dateFormat.parse(date));
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}

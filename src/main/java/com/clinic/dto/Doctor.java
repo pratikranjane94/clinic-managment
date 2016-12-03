@@ -1,6 +1,7 @@
 package com.clinic.dto;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Doctor {
 	private int drID;
@@ -10,14 +11,14 @@ public class Doctor {
 	private Clinic clinic;
 	private Patient patient;
 	private Appointment appointment;
-	private ArrayList<String> avalibilityList;
-	private ArrayList<Integer> clinicIdList;
+	private List<String> avalibilityList;
+	private List<Integer> clinicIdList;
 
-	public ArrayList<String> getAvalibilityList() {
+	public List<String> getAvalibilityList() {
 		return avalibilityList;
 	}
 
-	public void setAvalibilityList(ArrayList<String> avalibilityList) {
+	public void setAvalibilityList(List<String> avalibilityList) {
 		this.avalibilityList = avalibilityList;
 	}
 
@@ -53,7 +54,7 @@ public class Doctor {
 		this.availability = availability;
 	}
 
-	public ArrayList<Integer> getClinicIdList() {
+	public List<Integer> getClinicIdList() {
 		return clinicIdList;
 	}
 
